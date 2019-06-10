@@ -1,0 +1,115 @@
+---
+# tasks\SetUpAD.yml
+
+# First Play installs dsc resource on all future domain controllers
+
+- name: use win_psmodule to install dsc resources on target machines
+  win_psmodule:
+    name: xActiveDirectory
+    state: present
+  ignore_errors: True
+- name: copy dsc resources to target machines
+  win_copy:
+    src: files/xActiveDirectory
+    dest: C:\Program Files\WindowsPowerShell\Modules
+    force: no
+- name: create temp folder
+  win_file:
+    path: C:\Temp
+    state: directory
+- name: copy LCM disablement script
+  win_copy:
+    src: files/disable_lcm_allow_reboot.ps1
+    dest: c:\Temp\
+- name: disable LCM before using win_dsc module
+  win_shell: c:\temp\disable_lcm_allow_reboot.ps1
+
+#- name: Promote to Domain Controller
+#  win_domain_controller:
+#    dns_domain_name: "{{domain_name}}"
+#    domain_admin_user: "{{domain_admin_username}}"
+#    domain_admin_password: "{{domain_admin_password}}"
+#    safe_mode_password: "{{domain_admin_password}}"
+#    state: domain_controller
+#    log_path: c:\ansible_win_domain_controller.txt
+#  register: windc
+#
+#- debug: var=windc
+#
+#- name: Reboot if needed
+#  win_reboot:
+#  when: windc.changed == true
+#
+#- name: Sleep 60 seconds before adding windows group... sigh...
+#  pause:
+#    minutes: 1
+#  when: windc.changed
+
+- name: create domain on first DC
+  win_dsc:
+    resource_name: "xADDomain"
+    DomainName: "{{domain_name}}"
+    DomainAdministratorCredential_username: "{{domain_admin_username}}"
+    DomainAdministratorCredential_password: "{{domain_admin_password}}"
+    SafemodeAdministratorPassword_username: NotUsedButNeededForCredentialObjectPair
+    SafemodeAdministratorPassword_password: IHopeINeverNeedThis!!
+- name: wait for DC to come back online
+  wait_for_connection:
+      delay: 0 # not required. Number of seconds to wait before starting to poll.
+      sleep: 5 # not required. Number of seconds to sleep between checks.
+      connect_timeout: 500 # not required. Maximum number of seconds to wait for a connection to happen before closing and retrying.
+      timeout: 600 # not required. Maximum number of seconds to wait for.
+- name: Set multiple lookup addresses on all visible adapters (usually physical adapters that are in the Up state), with debug logging to a file
+  win_dns_client:
+    adapter_names: '*'
+    ipv4_addresses:
+    - 127.0.0.1
+    - 8.8.8.8
+
+
+## Third play joins member server to the new domain
+#- hosts: members
+#  gather_facts: yes
+#  vars:
+#  - domain_name: summit2019.local
+#  vars_files:
+#  - vars.yml
+#  tasks:
+#  - name: install xComputerManagement DSC Resource from PowerShell Gallery
+#    win_psmodule:
+#      name: xComputerManagement
+#      state: present
+#    ignore_errors: True
+#  - name: copy dsc resources to target machines
+#    win_copy:
+#      src: files/{{item}}
+#      dest: C:\Program Files\WindowsPowerShell\Modules
+#      force: no
+#    loop:
+#    - xActiveDirectory
+#    - xComputerManagement
+#  - name: copy LCM disablement script
+#    win_copy:
+#      src: files/disable_lcm_no_reboot.ps1
+#      dest: c:\Temp\
+#  - name: disable LCM before using win_dsc module and don't allow dsc to do a reboot
+#    win_shell: c:\temp\disable_lcm_no_reboot.ps1
+#  - name: wait for domain via win_dsc module
+#    win_dsc:
+#      resource_name: xWaitForADDomain
+#      DomainName: "{{domain_name}}"
+#      RetryIntervalSec: 5
+#      RetryCount: 999
+#      RebootRetryCount: 100
+#
+#  - name: join machine to domain
+#    win_dsc:
+#      resource_name: xComputer
+#      name: "{{ansible_hostname}}"
+#      domainname: "{{domain_name}}"
+#      Credential_username: "{{domain_admin_username}}"
+#      Credential_password: "{{domain_admin_password}}"
+#    notify: reboot
+#  handlers:
+#  - name: reboot
+#    win_reboot:
