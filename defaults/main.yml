@@ -2,5 +2,5 @@
 # template\roles\adds\defaults\main.yml
 
 domain_admin_username: tsunami\\Administrator
-domain_admin_password: SuperSecretPassword1234
+domain_admin_password: SuperSecretPassword1234!
 domain_name: tsunami.LOCAL
