@@ -52,7 +52,7 @@
     DomainAdministratorCredential_username: "{{domain_admin_username}}"
     DomainAdministratorCredential_password: "{{domain_admin_password}}"
     SafemodeAdministratorPassword_username: NotUsedButNeededForCredentialObjectPair
-    SafemodeAdministratorPassword_password: IHopeINeverNeedThis!!
+    SafemodeAdministratorPassword_password: 1Hope1NeverNeedThis!!
 - name: wait for DC to come back online
   wait_for_connection:
       delay: 0 # not required. Number of seconds to wait before starting to poll.
