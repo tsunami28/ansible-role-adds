@@ -2,5 +2,4 @@
 # tasks\main.yml
 
 - include_tasks: roles.yml
-#- include_tasks: staticIP.yml
 - include_tasks: SetUpAD.yml

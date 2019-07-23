@@ -10,7 +10,7 @@
   ignore_errors: True
 - name: copy dsc resources to target machines
   win_copy:
-    src: files/xActiveDirectory
+    src: ../../files/xActiveDirectory
     dest: C:\Program Files\WindowsPowerShell\Modules
     force: no
 - name: create temp folder
@@ -19,10 +19,16 @@
     state: directory
 - name: copy LCM disablement script
   win_copy:
-    src: files/disable_lcm_allow_reboot.ps1
+    src: ../../files/disable_lcm_allow_reboot.ps1
     dest: c:\Temp\
 - name: disable LCM before using win_dsc module
   win_shell: c:\temp\disable_lcm_allow_reboot.ps1
+- name: copy account script
+  win_copy:
+    src: ../../files/SetAdminAcc.ps1
+    dest: c:\Temp\
+- name: Set properties for Administrator account
+  win_shell: c:\temp\SetAdminAcc.ps1
 
 #- name: Promote to Domain Controller
 #  win_domain_controller:
@@ -59,12 +65,12 @@
       sleep: 5 # not required. Number of seconds to sleep between checks.
       connect_timeout: 500 # not required. Maximum number of seconds to wait for a connection to happen before closing and retrying.
       timeout: 600 # not required. Maximum number of seconds to wait for.
-- name: Set multiple lookup addresses on all visible adapters (usually physical adapters that are in the Up state), with debug logging to a file
-  win_dns_client:
-    adapter_names: '*'
-    ipv4_addresses:
-    - 127.0.0.1
-    - 8.8.8.8
+#- name: Set multiple lookup addresses on all visible adapters (usually physical adapters that are in the Up state), with debug logging to a file
+#  win_dns_client:
+#    adapter_names: '*'
+#    ipv4_addresses:
+#    - 127.0.0.1
+#    - 8.8.8.8
 
 
 ## Third play joins member server to the new domain
