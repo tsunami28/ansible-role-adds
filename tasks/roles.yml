@@ -11,8 +11,7 @@
 
 - name: reboot if AD DS was installed
   win_reboot:
-    when: adds_install.changed == true
-
+    when: adds_install.changed
 #- name: set DNS client settings to first DC ip address
 #  win_dns_client:
 #    adapter_names: '*'
