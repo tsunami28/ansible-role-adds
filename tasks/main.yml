@@ -2,4 +2,5 @@
 # tasks\main.yml
 
 - include_tasks: roles.yml
-- include_tasks: SetUpAD.yml
+- include_tasks: Install_DC_1.yml
+- include_tasks: Install_DC_2.yml
