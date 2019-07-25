@@ -7,4 +7,4 @@
     domain_admin_password: "{{domain_admin_password}}"
     safe_mode_password: 1Hope1NeverNeedThis!!
     state: domain_controller
-  delegate_to: "{{ setup_name }}-dc-1"
+  #delegate_to: "{{ setup_name }}-dc-1"

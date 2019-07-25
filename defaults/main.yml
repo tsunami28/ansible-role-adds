@@ -1,6 +1,4 @@
 ---
 # template\roles\adds\defaults\main.yml
 
-domain_admin_username: carapice\\Administrator
-domain_admin_password: SuperSecretPassword1234!
 domain_name: carapice.LOCAL

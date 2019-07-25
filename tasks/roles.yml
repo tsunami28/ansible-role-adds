@@ -12,6 +12,10 @@
 - name: reboot if AD DS was installed
   win_reboot:
   when: adds_install.restart_needed == true
+
+- name: List some variables
+  debug:
+  msg: "Domain name is {{domain_name}}, domain admin is {{domain_admin_username}} with password {{domain_admin_password}}"
 #- name: set DNS client settings to first DC ip address
 #  win_dns_client:
 #    adapter_names: '*'
