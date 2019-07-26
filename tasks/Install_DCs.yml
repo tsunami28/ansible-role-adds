@@ -1,0 +1,61 @@
+---
+- name: Ensure user Administrator is present
+  win_user:
+    name: Administrator
+    password: "{{domain_admin_password}}"
+    state: present
+- name: copy account script
+  win_copy:
+    src: ../../files/SetAdminAcc.ps1
+    dest: c:\Temp\
+- name: Set properties for Administrator account
+  win_shell: c:\temp\SetAdminAcc.ps1
+
+- name: Create new domain in a new forest on the target host
+  win_domain:
+    dns_domain_name: "{{domain_name}}"
+    safe_mode_password: 1Hope1NeverNeedThis!!
+  register: res
+  delegate_to: "{{ setup_name }}-dc-1"
+
+- name: Reboot
+  win_reboot:
+  when: res.reboot_required
+- name: wait for DC to come back online
+  wait_for_connection:
+      delay: 0 # not required. Number of seconds to wait before starting to poll.
+      sleep: 5 # not required. Number of seconds to sleep between checks.
+      connect_timeout: 500 # not required. Maximum number of seconds to wait for a connection to happen before closing and retrying.
+      timeout: 600 # not required. Maximum number of seconds to wait for.
+
+#- name: List some variables
+#  debug:
+#    msg: "The IP Address is {{ hostvars['carapice-dc-1']['xs_vm_def']['networks'][1]['ip'] | ipaddr('address') }}"
+
+- name: Configure Primary DNS Server
+  win_dns_client:
+    adapter_names: '*'
+    ipv4_addresses:
+    - "{{ hostvars['carapice-dc-1']['xs_vm_def']['networks'][1]['ip'] | ipaddr('address') }}"
+    - 127.0.0.1
+  delegate_to: "{{ setup_name }}-dc-2"
+
+- name: Ensure a server is a domain controller
+  win_domain_controller:
+    dns_domain_name: "{{domain_name}}"
+    domain_admin_user: "{{domain_admin_username}}"
+    domain_admin_password: "{{domain_admin_password}}"
+    safe_mode_password: 1Hope1NeverNeedThis!!
+    state: domain_controller
+    register: res2
+  delegate_to: "{{ setup_name }}-dc-2"
+
+- name: Reboot
+  win_reboot:
+  when: res2.reboot_required
+- name: wait for DC to come back online
+  wait_for_connection:
+      delay: 0 # not required. Number of seconds to wait before starting to poll.
+      sleep: 5 # not required. Number of seconds to sleep between checks.
+      connect_timeout: 500 # not required. Maximum number of seconds to wait for a connection to happen before closing and retrying.
+      timeout: 600 # not required. Maximum number of seconds to wait for.

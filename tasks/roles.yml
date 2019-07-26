@@ -13,22 +13,6 @@
   win_reboot:
   when: adds_install.restart_needed == true
 
-- name: List some variables
-  debug:
-  msg: "Domain name is {{domain_name}}, domain admin is {{domain_admin_username}} with password {{domain_admin_password}}"
-#- name: set DNS client settings to first DC ip address
-#  win_dns_client:
-#    adapter_names: '*'
-#    ipv4_addresses: "192.168.123.178"
-
-#  - name: set administrator password
-#    win_user:
-#      Name: Administrator
-#      Password: SuperSecretPassword1234
-
-#  - name: stop windows update service and set to disabled
-#    win_service:
-#      name: wuauserv
-#      start_mode: disabled
-#      state: stopped
-#      # force_dependent_services: true
+#- name: List some variables
+#  debug:
+#    msg: "Domain name is {{domain_name}}, domain admin is {{domain_admin_username}} with password {{domain_admin_password}}"
