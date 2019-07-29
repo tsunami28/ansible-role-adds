@@ -6,7 +6,7 @@
     state: present
 - name: copy account script
   win_copy:
-    src: ../../files/SetAdminAcc.ps1
+    src: ../../files/ToDo/SetAdminAcc.ps1
     dest: c:\Temp\
 - name: Set properties for Administrator account
   win_shell: c:\temp\SetAdminAcc.ps1

@@ -19,13 +19,13 @@
     state: directory
 - name: copy LCM disablement script
   win_copy:
-    src: ../../files/disable_lcm_allow_reboot.ps1
+    src: ../../files/ToDo/disable_lcm_allow_reboot.ps1
     dest: c:\Temp\
 - name: disable LCM before using win_dsc module
   win_shell: c:\temp\disable_lcm_allow_reboot.ps1
 - name: copy account script
   win_copy:
-    src: ../../files/SetAdminAcc.ps1
+    src: ../../files/ToDo/SetAdminAcc.ps1
     dest: c:\Temp\
 - name: Set properties for Administrator account
   win_shell: c:\temp\SetAdminAcc.ps1
