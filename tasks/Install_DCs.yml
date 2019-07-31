@@ -11,16 +11,27 @@
 - name: Set properties for Administrator account
   win_shell: c:\temp\SetAdminAcc.ps1
 
+- name: copy IPv6 script
+  win_copy:
+    src: ../../files/ToDo/DisableIPv6.ps1
+    dest: c:\Temp\
+- name: Set properties for network adapters
+  win_shell: c:\temp\DisableIPv6.ps1
+
 - name: Create new domain in a new forest on the target host
   win_domain:
     dns_domain_name: "{{domain_name}}"
     safe_mode_password: 1Hope1NeverNeedThis!!
   register: res
   delegate_to: "{{ setup_name }}-dc-1"
+  ignore_errors: True
 
 - name: Reboot
   win_reboot:
   when: res.reboot_required
+  delegate_to: "{{ setup_name }}-dc-1"
+  ignore_errors: True
+
 - name: wait for DC to come back online
   wait_for_connection:
       delay: 0 # not required. Number of seconds to wait before starting to poll.
@@ -38,7 +49,20 @@
     ipv4_addresses:
     - "{{ hostvars['carapice-dc-1']['xs_vm_def']['networks'][1]['ip'] | ipaddr('address') }}"
     - 127.0.0.1
+  register: dns_change
   delegate_to: "{{ setup_name }}-dc-2"
+
+- name: Reboot
+  win_reboot:
+  when: dns_change
+  ignore_errors: True
+
+- name: wait for DC to come back online
+  wait_for_connection:
+      delay: 0 # not required. Number of seconds to wait before starting to poll.
+      sleep: 5 # not required. Number of seconds to sleep between checks.
+      connect_timeout: 500 # not required. Maximum number of seconds to wait for a connection to happen before closing and retrying.
+      timeout: 600 # not required. Maximum number of seconds to wait for.
 
 - name: Ensure a server is a domain controller
   win_domain_controller:
@@ -47,12 +71,16 @@
     domain_admin_password: "{{domain_admin_password}}"
     safe_mode_password: 1Hope1NeverNeedThis!!
     state: domain_controller
-    register: res2
+    #register: res2
   delegate_to: "{{ setup_name }}-dc-2"
+  ignore_errors: True
 
 - name: Reboot
   win_reboot:
-  when: res2.reboot_required
+  #when: res2.reboot_required
+  delegate_to: "{{ setup_name }}-dc-2"
+  ignore_errors: True
+
 - name: wait for DC to come back online
   wait_for_connection:
       delay: 0 # not required. Number of seconds to wait before starting to poll.
